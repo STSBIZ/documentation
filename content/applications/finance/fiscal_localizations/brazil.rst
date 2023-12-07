@@ -8,12 +8,14 @@ Brazil
 Introduction
 ============
 
-With the Brazilian localization you can automatically compute sales taxes for goods using AvaTax
-(Avalara) through API calls, also configure taxes for services.
+With the Brazilian localization, sales taxes can be automatically computed and electronic invoices
+(NF-e) for goods can be sent using AvaTax (Avalara) through API calls. Moreover, taxes for services
+can be configured.
 
-For the goods tax computation part, you need to configure the :ref:`contacts <brazil/contacts>`,
-:ref:`company <brazil/company>`, :ref:`products <brazil/products>`, and :ref:`create an account in
-Avatax <brazil/avatax-account>` from the Odoo general settings.
+For the goods tax computation and electronic invoicing process, you need to configure the
+:ref:`contacts <brazil/contacts>`, :ref:`company <brazil/company>`, :ref:`products
+<brazil/products>`, and :ref:`create an account in Avatax <brazil/avatax-account>` from the Odoo
+general settings.
 
 For the services taxes, you can create and configure them from Odoo directly without computing them
 with AvaTax.
@@ -46,7 +48,7 @@ localization:
    * - :guilabel:`Brazil - Accounting Reports`
      - `l10n_br_reports`
      - Adds a simple tax report that helps check the tax amount per tax group in a given period of
-       time. Also adds the P&L and BS adapted for the Brazilian market.
+       time. Also adds the P\&L and BS adapted for the Brazilian market.
    * - :guilabel:`Avatax Brazil`
      - `l10n_br_avatax`
      - Add Brazilian tax calculation via Avatax and all necessary fields needed to configure Odoo in
@@ -55,6 +57,12 @@ localization:
    * - :guilabel:`Avatax for SOs in Brazil`
      - `l10n_br_avatax_sale`
      - Same as the `l10n_br_avatax` module with the extension to the sales order module.
+   * - :guilabel:`Brazilian Accounting EDI`
+     - `L10n_br_edi`
+     - Provides electronic invoicing for Brazil through Avatax.
+   * - :guilabel:`Brazilian Accounting EDI For Sale`
+     - `l10n_br_edi_sale`
+     - Adds some fields to sales orders that will be carried over to invoices.
 
 .. _brazil/company:
 
@@ -70,9 +78,15 @@ given to your company.
    - :guilabel:`Name`
    - :guilabel:`Address` (add :guilabel:`City`, :guilabel:`State`, :guilabel:`Zip Code`,
      :guilabel:`Country`)
-   - Tax ID (:guilabel:`CNPJ`)
-   - :guilabel:`IE` (State Registration)
-   - :guilabel:`IM` (Municipal Registration)
+
+     - In the :guilabel:`Street` field, enter the street name, number, and any additional address
+       information
+     - In the :guilabel:`Street 2` field, enter the neighborhood
+
+   - :guilabel:`Identification Number` (:guilabel:`CNPJ`, :guilabel:`CPF`)
+   - :guilabel:`Tax ID` (associated with the identification type)
+   - :guilabel:`IE` (State registration)
+   - :guilabel:`IM` (Municipal registration)
    - :guilabel:`SUFRAMA code` (Superintendence of the Manaus Free Trade Zone - add if applicable)
    - :guilabel:`Phone`
    - :guilabel:`Email`
@@ -88,7 +102,7 @@ given to your company.
    - :guilabel:`Main Activity Sector`
 
    .. image:: brazil/contact-fiscal-configuration.png
-     :alt: Company fiscal configuration.
+      :alt: Company fiscal configuration.
 
 #. Finally, upload a company logo and save the contact.
 
@@ -101,24 +115,30 @@ given to your company.
 Configure AvaTax integration
 ----------------------------
 
-Avalara AvaTax is a tax calculation provider that can be integrated in Odoo to automatically compute
-taxes by taking into account the company, contact (customer), product, and transaction information
-to retrieve the correct tax to be used.
+Avalara AvaTax is a tax calculation and electronic invoicing provider that can be integrated in Odoo
+to automatically compute taxes by taking into account the company, contact (customer), product, and
+transaction information to retrieve the correct tax to be used and process the e-invoice afterwards
+with the government.
 
 Odoo is a certified partner of Avalara Brazil, which means that Avalara experts reviewed workflows
 covered within the scope of the integration.
 
-Using this integration requires :doc:`In-App-Purchases (IAPs)
-</applications/general/in_app_purchase>` to compute taxes. Every time you compute taxes, an API call
-is made, using credits from your |IAP| credits balance.
+Using this integration requires :doc:`In-App-Purchases (IAPs) <../../general/in_app_purchase>` to
+compute the taxes and to send the electronic invoices. Every time you compute taxes, an API call is
+made, using credits from your |IAP| credits balance.
 
 Credential configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 To activate AvaTax in Odoo, you need to create an account. To do so, go to
-:menuselection:`Accounting --> Configuration --> Settings --> Taxes`, and, in the :guilabel:`AvaTax
-Brazil` section, add the email address you want to use to log in to the AvaTax portal, and click on
-:guilabel:`Create account`. This email is used as the administrator email address in AvaTax.
+:menuselection:`Accounting --> Configuration --> Settings --> Taxes`, and in the :guilabel:`AvaTax
+Brazil` section, add the administration email address to be used for the AvaTax portal in the
+:guilabel:`Avatax Portal Email`, and then click on :guilabel:`Create account`.
+
+.. warning::
+   When **testing** an :guilabel:`Avatax Portal Email` integration in a testing or sandbox database,
+   use an alternate email address. It is **not** possible to re-use the same email address on the
+   production database.
 
 After you create the account from Odoo, you need to go to the Avalara Portal to set up your
 password:
@@ -130,15 +150,10 @@ password:
 #. You will receive an email with a token and a link to create your password. Click on this link and
    copy-paste the token to allocate your desired password.
 
-.. warning::
-   If you intend first to try the integration on a testing or sandbox database, using an alternate
-   email address is recommended, as you won't be able to re-use the same email address on your
-   production database.
-
 .. tip::
-   You can start using AvaTax in Odoo without creating a password and accessing the Avalara Portal;
-   for Odoo, the only requirement to start using the Avalara Tax Computation Engine is to create an
-   account from the settings page.
+   You can start using AvaTax in Odoo for tax computation **only** without creating a password and
+   accessing the Avalara portal in the Odoo database. However, in order to use the electronic
+   invoice service, you **must** access the AvaTax portal and upload your certificate there.
 
 .. image:: brazil/avatax-account-configuration.png
    :alt: Avatax account configuration.
@@ -147,22 +162,52 @@ password:
    You can transfer API credentials. Use this only when you have already created an account in
    another Odoo instance and wish to reuse it.
 
+A1 certificate upload
+~~~~~~~~~~~~~~~~~~~~~
+
+In order to issue electronic invoices, a certificate needs to be uploaded to the `AvaTax portal
+<https://portal.avalarabrasil.com.br/Login>`_.
+
+The certificate will be synchronized with Odoo, as long as the external identifier number in the
+AvaTax portal matches - without special characters - with the CNPJ number, and the identification
+number (CNPJ) in Odoo matches with the CNPJ in AvaTax.
+
 Configure master data
 ---------------------
 
 Chart of accounts
 ~~~~~~~~~~~~~~~~~
 
-The :doc:`chart of accounts </applications/finance/accounting/get_started/chart_of_accounts>` is
-installed by default as part of the data set included in the localization module. The accounts are
-mapped automatically in their corresponding taxes, and the default account payable and account
-receivable fields.
+The :doc:`chart of accounts <../accounting/get_started/chart_of_accounts>` is installed by default
+as part of the data set included in the localization module. The accounts are mapped automatically
+in their corresponding taxes, and the default account payable and account receivable fields.
 
 .. note::
    The chart of accounts for Brazil is based on the SPED CoA, which gives a baseline of the accounts
    needed in Brazil.
 
    You can add or delete accounts according to the company's needs.
+
+Journals
+~~~~~~~~
+
+In Brazil, a *series* number is linked to a sequence number range for electronic invoices. The
+series number can be configured in Odoo on a sales journal from the :guilabel:`Series` field. If
+more than one series is needed, then a new sales journal will need to be created and a new series
+number assigned to it for each series needed.
+
+As well, the boolean field :guilabel:`Use Documents?` needs to be selected. When issuing electronic
+and non-electronic invoices, the :guilabel:`Type` field is used to select the document type used
+when creating the invoice. The :guilabel:`Type` field will only be displayed if the :guilabel:`Use
+Documents?` field is selected on the journal.
+
+.. image:: brazil/journal-configuration.png
+   :alt: Journal configuration with the Use Documents? field checked.
+
+.. note::
+   When creating the journal, ensure the field :guilabel:`Dedicated Credit Note Sequence` is
+   unchecked, as in Brazil, sequences between invoices, credit notes and debit notes are shared per
+   series number, which means, per journal.
 
 Taxes
 ~~~~~
@@ -183,7 +228,7 @@ added or subtracted on top of the product price), set the :guilabel:`Tax Computa
 the :guilabel:`Included in Price` option.
 
 For more information on configuring taxes to fit your needs better, please go to the :doc:`taxes
-functional documentation </applications/finance/accounting/taxes>`.
+functional documentation <../accounting/taxes>`.
 
 .. image:: brazil/tax-configuration.png
    :alt: Tax configuration.
@@ -231,10 +276,16 @@ Before using the integration, specify the following information on the contact:
    - Select the :guilabel:`Company` option for a contact with a tax ID (CNPJ), or check
      :guilabel:`Individual` for a contact with a CPF.
    - :guilabel:`Name`
-   - :guilabel:`Address`: :guilabel:`Zip Code` is a required field to compute taxes properly.
-   - :guilabel:`Tax ID` or :guilabel:`CPF`: Use CPF for individuals and Tax ID (CNPJ) for companies
+   - :guilabel:`Address` (add :guilabel:`City`, :guilabel:`State`, :guilabel:`Zip Code`,
+     :guilabel:`Country`)
+
+     - In the :guilabel:`Street` field, enter the street, number, and any extra address information
+     - In the :guilabel:`Street 2` field, enter the neighborhood
+
+   - :guilabel:`Identification Number` (:guilabel:`CNPJ`, :guilabel:`CPF`)
+   - :guilabel:`Tax ID` (associated with the identification type)
    - :guilabel:`IE`: state tax identification number
-   - :guilabel:`IM`: municipa tax identification number
+   - :guilabel:`IM`: municipal tax identification number
    - :guilabel:`SUFRAMA code`: SUFRAMA registration number
    - :guilabel:`Phone`
    - :guilabel:`Email`
@@ -246,7 +297,7 @@ Before using the integration, specify the following information on the contact:
       The :guilabel:`CPF`, :guilabel:`IE`, :guilabel:`IM`, and :guilabel:`SUFRAMA code` fields are
       are hidden until the :guilabel:`Country` is set to `Brazil`.
 
-#. Fiscal information about the contact under the :guilabel:`Sales & Purchase` tab:
+#. Fiscal information about the contact under the :guilabel:`Sales \& Purchase` tab:
 
    - :guilabel:`Fiscal Position`: add the AvaTax fiscal position to automatically compute taxes on
      sale orders and invoices automatically.
@@ -256,15 +307,16 @@ Before using the integration, specify the following information on the contact:
    - :guilabel:`Main Activity Sector`: list of main activity sectors of the contact
 
    .. image:: brazil/contact-fiscal-configuration.png
-     :alt: Contact fiscal configuration.
+      :alt: Contact fiscal configuration.
 
 .. _brazil/fiscal-positions:
 
 Fiscal positions
 ~~~~~~~~~~~~~~~~
 
-To compute taxes on sale orders and invoices, it is necessary to have a :guilabel:`Fiscal Position`
-with the :guilabel:`Detect Automatically` and the :guilabel:`Use AvaTax API` options enabled.
+To compute taxes and send electronic invoices on sale orders and invoices, it is necessary to have a
+:guilabel:`Fiscal Position` with both the :guilabel:`Detect Automatically` and the :guilabel:`Use
+AvaTax API` options enabled.
 
 The :guilabel:`Fiscal Position` can be configured on the contact or selected when creating a sales
 order or an invoice.
@@ -275,14 +327,18 @@ order or an invoice.
 Workflows
 =========
 
-This section provides an overview of the actions that trigger API calls for tax computation.
+This section provides an overview of the actions that trigger API calls for tax computation, and how
+to send an electronic invoice for goods (NF-e) for government validation.
 
 .. warning::
    Please note that each API call incurs a cost. Be mindful of the actions that trigger these calls
    to manage costs effectively.
 
-Tax calculations on quotation / sales orders
---------------------------------------------
+Tax computation
+---------------
+
+Tax calculations on quotations / sales orders
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Trigger an API call to calculate taxes on a quotation or sales order automatically with AvaTax in
 any of the following ways:
@@ -299,7 +355,7 @@ any of the following ways:
     When a customer accesses the quotation online (via the portal view), the API call is triggered.
 
 Tax calculations on invoices
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Trigger an API call to calculate taxes on a customer invoice automatically with AvaTax any of the
 following ways:
@@ -316,5 +372,150 @@ following ways:
    of these actions to compute taxes automatically.
 
 .. seealso::
-   :doc:`Fiscal positions (tax and account mapping)
-   </applications/finance/accounting/taxes/fiscal_positions>`
+   :doc:`Fiscal positions (tax and account mapping) <../accounting/taxes/fiscal_positions>`
+
+.. _brazil/electronic-documents:
+
+Electronic documents
+--------------------
+
+Customer invoices
+~~~~~~~~~~~~~~~~~
+
+To process an electronic invoice for goods (NF-e), the invoice needs to be confirmed and taxes need
+to be computed by Avalara. Once that step is done, click on the :guilabel:`Send \& Print` button in
+the upper left corner, and a pop-up will appear. Then click on :guilabel:`Process e-invoice` and any
+of the other options - :guilabel:`Download` or :guilabel:`Email`. Finally, click on :guilabel:`Send
+\& Print` to process the invoice against the government.
+
+Before sending the electronic invoice for goods (NF-e) some fields need to be filled out on the
+invoice:
+
+- :guilabel:`Customer` with all the customer information.
+- :guilabel:`Payment Method: Brazil` (how the invoice is planned to be paid).
+- :guilabel:`Fiscal Position` set as the :guilabel:`Automatic Tax Mapping (Avalara Brazil)`.
+- :guilabel:`Document Type` set as :guilabel:`(55) Electronic Invoice (NF-e)`. This is the only
+   electronic document supported at the moment. Non-electronic invoices can be registered, and other
+   document types can be activated if needed.
+
+There are some other optional fields that depend on the nature of the transaction. These fields are
+not required, so no errors will appear from the government if these optional fields are not
+populated for most cases:
+
+- :guilabel:`Freight Model` determines how the goods are planned to be transported - domestic.
+- :guilabel:`Transporter Brazil` determines who is doing the transportation.
+
+.. image:: brazil/invoice-info-needed.png
+   :alt: Invoice information needed to process an electronic invoice.
+
+.. image:: brazil/process-electronic-invoice.png
+   :alt: Process electronic invoice pop-up in Odoo.
+
+.. note::
+   All fields available on the invoice in order to issue an electronic invoice are also available on
+   the sales order, if needed. When creating the first invoice, the field :guilabel:`Document
+   Number` is displayed, allocated as the first number to be used sequentially for subsequent
+   invoices.
+
+Credit notes
+~~~~~~~~~~~~
+
+If a sales return needs to be registered, then a credit note can be created in Odoo to be sent to
+the government for validation.
+
+To perform this, click on the :guilabel:`Credit Note` button located at the top of the invoice, add
+a :guilabel:`Reason` if needed, and finally click :guilabel:`Reverse`.
+
+.. image:: brazil/credit-note.png
+   :alt: Credit note creation in Odoo.
+
+.. note::
+   The required fields on the credit note are the same that apply for :ref:`customer invoices
+   <brazil/electronic-documents>`.
+
+Debit Notes
+~~~~~~~~~~~
+
+If additional information needs to be included, or values need to be corrected that were not
+accurately provided in the original invoice, a debit note can be issued.
+
+.. important::
+   Only the products included in the original invoice can be part of the debit note. While changes
+   can be made to the product's unit price or quantity, products **cannot** be added to the debit
+   note. The purpose of this document is only to declare the amount that you want to add to the
+   original invoice for the same or fewer products.
+
+To create a debit note from an invoice, go to the :guilabel:`⚙️ (gear)` icon in the left upper
+corner of the invoice and select :guilabel:`Debit Note`, then click on :guilabel:`Copy lines`, and
+finally, click :guilabel:`Create Debit Note`.
+
+.. image:: brazil/debit-note.png
+   :alt: Debit note creation in Odoo.
+
+.. note::
+   The required fields on the debit note are the same that apply for :ref:`customer invoices
+   <brazil/electronic-documents>`.
+
+Invoice cancellation
+~~~~~~~~~~~~~~~~~~~~
+
+It is possible to cancel an electronic invoice that was validated by the government.
+
+.. important::
+   Check whether the electronic invoice is still within the cancellation deadline, which may vary
+   according to the legislation of each state.
+
+This can be done in Odoo by clicking :guilabel:`Request Cancel` and adding a cancellation
+:guilabel:`Reason` on the pop-up that appears. If you want to send this cancellation reason to the
+customer via email, activate the :guilabel:`E-mail` checkbox.
+
+.. image:: brazil/invoice-cancellation.png
+   :alt: Invoice cancellation reason in Odoo.
+
+Correction letter
+~~~~~~~~~~~~~~~~~
+
+A correction letter can be created and linked to an electronic invoice that was validated by the
+government.
+
+This can be done in Odoo by clicking :guilabel:`Correction Letter` and adding a correction
+:guilabel:`Reason` on the pop-up that appears. To send this correction reason to a customer via
+email, activate the :guilabel:`E-mail` checkbox.
+
+.. image:: brazil/correction-letter.png
+   :alt: Correction letter reason in Odoo.
+
+Invalidate invoice number range
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A range of numbers within series that are assigned to sales journals can be invalidated with the
+government, only if those sequences are not used **and** are not going to be used. To do so,
+navigate to the journal, and click the ::menuselection:`⚙️ (gear) icon --> Invalidate Number Range
+(BR)`. On the :guilabel:`Invalidate Number Range (BR)` wizard, add the :guilabel:`Initial Number`
+and :guilabel:`End Number` of the range that should be canceled, and enter an invalidation
+:guilabel:`Reason`.
+
+.. image:: brazil/range-number-invalidation.png
+   :alt: Number range invalidation selection in Odoo.
+
+.. image:: brazil/range-number-invalidation-wizard.png
+   :alt: Number range invalidation wizard in Odoo.
+
+.. note::
+   The log of the canceled numbers along with the XML file are recorded in the chatter of the
+   journal.
+
+Vendor bills
+------------
+
+On the vendor bills side, when receiving an invoice from a supplier, you can encode the bill in Odoo
+by adding all the commercial information together with the same Brazilian specific information that
+is recorded on the :ref:`customer invoices <brazil/electronic-documents>`.
+
+These Brazilian specific fields are:
+
+- :guilabel:`Payment Method: Brazil` (how the invoice is planned to be paid).
+- :guilabel:`Document Type` used by your vendor.
+- :guilabel:`Document Number` (the invoice number from your supplier).
+- :guilabel:`Freight Model` (how goods are planned to be transported - domestic).
+- :guilabel:`Transporter Brazil` (who is doing the transportation).
