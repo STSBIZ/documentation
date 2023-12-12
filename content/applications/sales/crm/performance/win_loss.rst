@@ -2,28 +2,34 @@
 Win/Loss reporting
 ==================
 
-A key performance indicator available in the *Pipeline Analysis* feature of the *CRM app* is the
-win/loss ratio, a metric of the leads/opportunities marked Won or Lost over a period of
-time. By calculating "opportunities won" over "opportunities lost", teams can identify what methods
-and/or individuals are efficiently converting leads into sales.
+A key performance indicator available on the *Pipeline Analysis* page of the *CRM* app is the
+Win/Loss ratio. 
+
+The Win/Loss ratio is a metric of the leads/opportunities marked Won or Lost over a period of
+time. By calculating "opportunities won" over "opportunities lost," teams can identify what methods
+and/or individuals are effectively converting leads into sales.
 
 .. math::
    \begin{equation}
    Win/Loss Ratio = \frac{Opportunities Won}{Opportunities Lost}
    \end{equation}
 
-A win/loss report can be customized to fit different needs. For example, a sales manager might group
-wins and losses by salesperson or sales team to see who has the best conversion rate, whereas a
-marketing team might group by sources or medium to determine where their advertising has been most
-successful.
+A Win/Loss report can be customized to fit a number different needs. To customize a Win/Loss report,
+navigate to *Pipeline Analysis* page, by going to :menuselection:`CRM app --> Reporting -->
+Pipeline`, and personalizing the data to fit any specific criteria desired.
+
+.. example::
+   A sales manager might group wins and losses by salesperson, or sales team, to see who has the
+   best conversion rate. Or, a marketing team might group by sources, or medium, to determine where
+   their advertising has been most successful.
 
 .. seealso::
    - :doc:`../acquire_leads/convert`
    - :doc:`../acquire_leads/send_quotes`
    - :doc:`../pipeline/lost_opportunities`
 
-Create a basic win/loss report
-==============================
+Create win/loss reports
+=======================
 
 A basic win/loss report filters **the leads/opportunities from the past year, whether won or
 lost, and groups the results by their stage in the CRM pipeline**. Displaying this in the
@@ -43,11 +49,18 @@ Follow the steps below to create a basic win/loss report using the above criteri
    :align: center
    :alt: The Search menu containing the filters for a basic win/loss report.
 
-2. In the *Search* menu, under the *Group By* heading, click :guilabel:`Stage`. Under the *Filters*
-   heading, click :guilabel:`Add Custom Filter`.
-3. In the resulting pop-up menu, click the current filter (by default, it is set to
-   :guilabel:`Country`) and select :guilabel:`Active` from the drop-down. The rule should now read
-   "`Active` `is` `set`".
+2. In drop-down menu that appears, under the :guilabel:`Group By` heading, click :guilabel:`Stage`.
+   Under the :guilabel:`Filters` heading, click :guilabel:`Add Custom Filter`.
+3. When the :guilabel:`Add Custom Filter` option is clicked, a :guilabel:`Add Custom Filter` pop-up
+window appears. From this pop-up window, click on the first field in the :guilabel:`Match any of the
+following rules:` section. By default, the option for :guilabel:`Country` is selected.
+
+Clicking that first field reveals a sub-menu with numerous options to choose from. From this
+sub-menu, locate and select the :guilabel:`Active` option. By doing so, the other fields become
+auto-populated.
+
+The first field reads: :guilabel:`Active`. The second field reads: :guilabel:`is`. And lastly, the
+third field reads: :guilabel:`set`. In total, the rule reads: :guilabel:`Active is set`.
 4. Click :guilabel:`New Rule`, and once more change the default filter to :guilabel:`Active`. Click
    on the last part of this rule and change it to read "`Active` `is` `not set`."
 5. Click :guilabel:`Add`.
